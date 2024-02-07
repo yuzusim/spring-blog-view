@@ -17,6 +17,30 @@ public class BoardController {
     private final HttpSession session;
     private final BoardRepository boardRepository;
 
+    @GetMapping("/board/{id}/updateForm")
+    public String updateFrom(@PathVariable int id, HttpServletRequest request){
+        // 인증 체크
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if(sessionUser == null){
+            return "redirect:/loginForm";
+        }
+
+        // 권한 체크
+        // 모델 위임(id로 board를 조회)
+        Board board = boardRepository.findById(id);
+        if(board.getUserId() != sessionUser.getId()){
+            return "error/403";
+        }
+
+        // 가방에 담기
+        request.setAttribute("board", board);
+
+
+
+        // 조인, 서브쿼리, 오더바이를 사용하면 서버의 부하가 높아진다.
+        return "board/updateForm";
+    }
+
     @PostMapping("/board/{id}/delete")
     public String delete(@PathVariable int id, HttpServletRequest request){
 
@@ -104,8 +128,6 @@ public class BoardController {
         if (sessionUser.getId() == responseDTO.getUserId()) {
             pageOwner = true;
         }
-
-
 
         request.setAttribute("board", responseDTO);
         request.setAttribute("pageOwner", pageOwner);
