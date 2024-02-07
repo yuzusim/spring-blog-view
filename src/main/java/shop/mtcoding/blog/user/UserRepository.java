@@ -36,4 +36,22 @@ public class UserRepository {
         User user = (User) query.getSingleResult();
         return user;
     }
+
+    public User findById(int id) {
+        Query query = em.createNativeQuery("select * from user_tb where id = ?", User.class);
+        query.setParameter(1, id);
+
+        User user = (User) query.getSingleResult();
+        return user;
+    }
+
+    @Transactional
+    public void update(UserRequest.UpdateDTO requestDTO, int id) {
+        Query query = em.createNativeQuery("update user_tb set password=? where id = ?");
+        query.setParameter(1, requestDTO.getPassword());
+        query.setParameter(2, id);
+
+        query.executeUpdate();
+
+    }
 }

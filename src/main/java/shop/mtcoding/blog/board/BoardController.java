@@ -17,6 +17,32 @@ public class BoardController {
     private final HttpSession session;
     private final BoardRepository boardRepository;
 
+    // ?title=제목1&content=내용1
+    // title=제목1&content=내용1
+    // 쿼리 스트링과 -x-www-form-urlencoded와 파싱 방법이 동일함
+
+    @PostMapping("/board/{id}/update")
+    public String update(@PathVariable int id, BoardRequest.UpdateDTO requestDTO ){
+        // 1. 인증 체크
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if(sessionUser == null){
+            return "redirect:/loginForm";
+        }
+
+        // 2. 권한 체크
+        Board board = boardRepository.findById(id);
+        if(board.getUserId() != sessionUser.getId()){
+            return "error/403";
+        }
+
+        // 3. 핵심 로직
+        // update board_tb set title = ?, content =? where id = ?;
+        boardRepository.update(requestDTO, id);
+
+        return "redirect:/board{id}" +id; // 그 게시물로 돌아감
+
+    }
+
     @GetMapping("/board/{id}/updateForm")
     public String updateFrom(@PathVariable int id, HttpServletRequest request){
         // 인증 체크
@@ -27,17 +53,16 @@ public class BoardController {
 
         // 권한 체크
         // 모델 위임(id로 board를 조회)
+        // 조인, 서브쿼리, 오더바이를 사용하면 서버의 부하가 높아진다.
         Board board = boardRepository.findById(id);
-        if(board.getUserId() != sessionUser.getId()){
-            return "error/403";
+        if (board.getUserId() != sessionUser.getId()) {
+            request.setAttribute("status", 403);
+            request.setAttribute("msg", "게시글을 수정할 권한이 없습니다");
+            return "error/40x"; // 리다이렉트 하면 데이터 사라지니까 하면 안됨
         }
 
         // 가방에 담기
         request.setAttribute("board", board);
-
-
-
-        // 조인, 서브쿼리, 오더바이를 사용하면 서버의 부하가 높아진다.
         return "board/updateForm";
     }
 
