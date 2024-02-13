@@ -2,6 +2,7 @@ package shop.mtcoding.blog.user;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,7 @@ public class UserRepository {
     }
 
     @Transactional // db에 write 할때는 필수
-    public void save(UserRequest.JoinDTO requestDTO){
+    public void save(UserRequest.JoinDTO requestDTO) {
         Query query = em.createNativeQuery("insert into user_tb(username, password, email, created_at) values(?,?,?, now())");
         query.setParameter(1, requestDTO.getUsername());
         query.setParameter(2, requestDTO.getPassword());
@@ -33,7 +34,42 @@ public class UserRepository {
         query.setParameter(1, requestDTO.getUsername());
         query.setParameter(2, requestDTO.getPassword());
 
+        try {
+            User user = (User) query.getSingleResult();
+            return user;
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    @Transactional
+    public void update(UserRequest.updateDTO requestDTO, int userid) {
+        Query query = em.createNativeQuery("update user_tb set password = ? where id = ?");
+        query.setParameter(1, requestDTO.getPassword());
+        query.setParameter(2, userid);
+
+        query.executeUpdate();
+    }
+
+    public User findById(int userid) {
+        Query query = em.createNativeQuery("select * from user_tb where id=?", User.class);
+        query.setParameter(1, userid);
+
         User user = (User) query.getSingleResult();
         return user;
+    }
+
+
+    public User findByUserName(String username) {
+        Query query = em.createNativeQuery("select * from user_tb where username=?", User.class);
+        query.setParameter(1, username);
+
+        try {
+            User user = (User) query.getSingleResult();
+            return user;
+        }catch (Exception e){
+            return null;
+        }
+
     }
 }
