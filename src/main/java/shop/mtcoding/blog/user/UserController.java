@@ -20,20 +20,20 @@ public class UserController {
     // 로그인만 예외로 select인데 post 사용
     // select * from user_tb where username=? and password=?
     @PostMapping("/login")
-    public String login(UserRequest.LoginDTO requestDTO){
+    public String login(UserRequest.LoginDTO requestDTO) {
 
 
         System.out.println(requestDTO); // toString -> @Data
 
-        if(requestDTO.getUsername().length() < 3){
+        if (requestDTO.getUsername().length() < 3) {
             return "error/400"; // ViewResolver 설정이 되어 있음. (앞 경로, 뒤 경로)
         }
 
         User user = userRepository.findByUsernameAndPassword(requestDTO);
 
-        if(user == null){ // 조회 안됨 (401)
+        if (user == null) { // 조회 안됨 (401)
             return "error/401";
-        }else{ // 조회 됐음 (인증됨)
+        } else { // 조회 됐음 (인증됨)
             session.setAttribute("sessionUser", user); // 락카에 담음 (StateFul)
         }
 
@@ -41,7 +41,7 @@ public class UserController {
     }
 
     @PostMapping("/join")
-    public String join(UserRequest.JoinDTO requestDTO){
+    public String join(UserRequest.JoinDTO requestDTO) {
         System.out.println(requestDTO);
 
         userRepository.save(requestDTO); // 모델에 위임하기

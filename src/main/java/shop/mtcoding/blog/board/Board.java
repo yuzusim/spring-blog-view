@@ -21,14 +21,3 @@ public class Board { // User 1 -> Board N
 
     private LocalDateTime createdAt;
 }
-
-
-
-
-
-
-
-
-
-
-
