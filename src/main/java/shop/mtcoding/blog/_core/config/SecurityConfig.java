@@ -30,7 +30,7 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain configure(HttpSecurity http) throws Exception {
-
+    // 시큐리티를 위한 필터가 체인이 걸려있음 이 필터체인(묶여있는거) 수정할거임
         http.csrf(c->c.disable());
 
         // 주소로 필터링 : 인증이 필요한 페이지를 주소로 구분
@@ -40,16 +40,18 @@ public class SecurityConfig {
                     .anyRequest().permitAll(); // 인증이 필요없는 페이지
         });
 
-
-
         // 기본 주소를 우리가 만든 페이지로 변경함
         // 인증 필요시 loginForm 으로
         http.formLogin(f -> {
             // 시큐리티가 들고있는 페이지를 사용할 것
             f.loginPage("/loginForm").loginProcessingUrl("/login").defaultSuccessUrl("/")
-                    .failureForwardUrl("/loginForm"); // 실패하면 이동
+                    .failureUrl("/loginForm"); // 실패하면 이동
         });
 
         return http.build(); // 코드의 변경이 없으면 부모 이름(추상적)으로 리턴할 필요 없음
     }
 }
+
+
+
+

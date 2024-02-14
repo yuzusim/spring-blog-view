@@ -35,4 +35,6 @@ public class MyLoginService implements UserDetailsService {
     }
 }
 
+
+
 // 시큐리티를 달고 서버가 실행되면 유저디테일즈서비스가 이미 등록된 상탱니데 그걸 임플리먼트해서 @Service를 달면 컴포넌트 스캔이 된다. 그럼 기존에 있던 유저디테일즈서비스의 메서드가 무력화되고 loadUserByUsername가 때려진다.
