@@ -6,12 +6,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
 @Repository
 public class BoardRepository {
     private final EntityManager em;
+
+
+
 
     public List<Board> findAll() {
         Query query = em.createNativeQuery("select * from board_tb order by id desc", Board.class);
@@ -26,9 +30,15 @@ public class BoardRepository {
         return board;
     }
 
+    // 수정하기
+    // 1. 쿼리 수정 (조회)
+    // 2.
+
     public BoardResponse.DetailDTO findByIdWithUser(int idx) {
-        Query query = em.createNativeQuery("select b.id, b.title, b.content, b.user_id, u.username from board_tb b inner join user_tb u on b.user_id = u.id where b.id = ?");
+
+         Query query = em.createNativeQuery("select b.id, b.title, b.content, b.user_id, u.username from board_tb b inner join user_tb u on b.user_id = u.id where b.id = ?");
         query.setParameter(1, idx);
+
 
         Object[] row = (Object[]) query.getSingleResult();
 
@@ -52,6 +62,47 @@ public class BoardRepository {
         responseDTO.setUsername(username);
 
         return responseDTO;
+
+
+//    public BoardResponse.DetailDTO findByIdWithUserAndWithReply(int idx) {
+//
+//        String qr = """
+//                select bt.id, bt.title, bt.content, bt.user_id, bt.created_at,
+//                rt.id r_id, rt.user_id r_user_id, rt.comment
+//                from board_tb bt
+//                left outer join reply_tb rt on bt.id = rt.board_id
+//                inner join user_tb but bt.user_id =but.id
+//                left outer join user_tb but rt.user_id =rut.id
+//                where bt.id = ?
+//                """;
+//
+//
+//        Query query = em.createNativeQuery("qr");
+//        query.setParameter(1, idx);
+//
+//        Object[] row = (Object[]) query.getSingleResult();
+//
+//
+//        List<Object[]> rows = query.getResultList();
+//        List<BoardResponse.DetailDTO> boardList = new ArrayList<>();
+//
+//        for (Object[] row : rows) {
+//            Integer id = (Integer) row[0];
+//            String title = (String) row[1];
+//            String content = (String) row[2];
+//            int userId = (Integer) row[3];
+//            String username = (String) row[4];
+//
+//            BoardResponse.DetailDTO responseDTO = new BoardResponse.DetailDTO();
+//
+//
+//            boardList.add(responseDTO);
+//        }
+//        return boardList;
+
+
+
+
     }
 
     @Transactional
@@ -80,4 +131,5 @@ public class BoardRepository {
 
         query.executeUpdate();
     }
+
 }

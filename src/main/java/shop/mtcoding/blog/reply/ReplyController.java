@@ -15,7 +15,7 @@ public class ReplyController {
      private final ReplyRepository replyRepository;
 
      @PostMapping("/reply/save")
-     public String write(ReplyRequest.WriteDTO requestDTO) {
+     public String write(ReplyRequest.WriteDTO requestDTO){
           System.out.println(requestDTO);
 
           User sessionUser = (User) session.getAttribute("sessionUser");
@@ -29,6 +29,6 @@ public class ReplyController {
           // 핵심 코드
           replyRepository.save(requestDTO, sessionUser.getId());
 
-          return "redirect:/board/" + requestDTO.getBoardId();
+          return "redirect:/board/"+requestDTO.getBoardId();
      }
 }

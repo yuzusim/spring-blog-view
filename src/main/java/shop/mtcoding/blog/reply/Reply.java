@@ -10,19 +10,12 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 public class Reply {
-    // 하이버네이트 기술
-
-    @Id // PK 설정
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto_increment 전략
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private String comment;
     private int userId;
     private int boardId;
-
-
     private LocalDateTime createdAt;
-
-
-
 }

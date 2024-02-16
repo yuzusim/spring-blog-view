@@ -17,14 +17,12 @@ public class ReplyRepository {
     private final EntityManager em;
 
     @Transactional
-    public void save(ReplyRequest.WriteDTO requestDTO, int userId){
-        Query query = em.createNativeQuery("insert into reply_tb(comment, board_id, user_id, created_at) values(?, ?, ?, now())");
+    public void save(ReplyRequest.WriteDTO requestDTO, int userId) {
+        Query query = em.createNativeQuery("insert into reply_tb(comment, board_id, user_id, created_at) values(?,?,?, now())");
         query.setParameter(1, requestDTO.getComment());
         query.setParameter(2, requestDTO.getBoardId());
         query.setParameter(3, userId);
 
         query.executeUpdate();
     }
-
-
 }
