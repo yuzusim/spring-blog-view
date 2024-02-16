@@ -3,14 +3,14 @@
 <div class="container p-5">
 
     <!-- 수정삭제버튼 -->
-    {{#pageOwner}}
+    {{#board.boardOwner}}
     <div class="d-flex justify-content-end">
         <a href="/board/{{id}}/updateForm" class="btn btn-warning me-1">수정</a>
         <form action="/board/{{board.id}}/delete" method="post">
             <button class="btn btn-danger">삭제</button>
         </form>
     </div>
-    {{/pageOwner}}
+    {{/board.boardOwner}}
     <div class="d-flex justify-content-end">
         <b>작성자</b> : {{board.username}}
     </div>

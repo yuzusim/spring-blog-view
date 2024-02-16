@@ -16,6 +16,22 @@ import java.util.List;
 public class ReplyRepository {
     private final EntityManager em;
 
+    public  List<BoardResponse.ReplyDTO> findByBoardId(int boardId){
+        String q = """
+                
+                select rt.id, rt.user_id, rt.comment, ut.username from reply_tb rt inner joinb user_tb ut on rt.user_id = ut.id whwre rt.board_id =?
+                """;
+
+        Query query = em.createNativeQuery(q); // q.ReplyDTO 리플리 디티오는 파싱안해줌 엔티티 아님 직접파싱
+        query.setParameter(1, boardId);
+
+        List<Object[]> rows = query.getResultList();
+
+        return rows.stream().map(row -> new BoardResponse.ReplyDTO(row)).toList();
+
+
+    }
+
     @Transactional
     public void save(ReplyRequest.WriteDTO requestDTO, int userId) {
         Query query = em.createNativeQuery("insert into reply_tb(comment, board_id, user_id, created_at) values(?,?,?, now())");
