@@ -13,20 +13,6 @@ public class BoardResponse {
 
     @Data
     public static class DetailDTO {
-//        @Id
-//        @GeneratedValue(strategy = GenerationType.IDENTITY)
-//        private int id;
-//
-//        @Column(length = 30)
-//        private String title;
-//        private String content;
-//        private int userId;
-//        private String username;
-
-        // 댓글보기
-        // 쿼리 조회 디테일 DTO뿌리기
-        // Board
-
         private Integer id;
         private String title;
         private String content;
@@ -61,12 +47,21 @@ public class BoardResponse {
         private Integer userId;
         private String comment;
         private String username;
+        private Boolean replyOwner; // 게시글 주인 여부 (세션값과 비교)
 
-        public ReplyDTO(Object[] ob) {
+
+        public ReplyDTO(Object[] ob, User sessionUser) {
             this.id = (Integer) ob[0];
             this.userId = (Integer) ob[1];
             this.comment = (String) ob[2];
             this.username = (String) ob[3];
+
+            if (sessionUser == null) {
+                replyOwner =false;
+            }else {
+                replyOwner = sessionUser.getId() == userId;
+
+            }
         }
     }
 
