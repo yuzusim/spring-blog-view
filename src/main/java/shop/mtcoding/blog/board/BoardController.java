@@ -115,28 +115,55 @@ public class BoardController {
     // localhost:8080?page=0
     // localhost:8080 -> page 값이 0
     @GetMapping("/")
-    public String index(HttpServletRequest request, @RequestParam(value = "page", defaultValue = "0") Integer page) { // RequestParam 안쓰면 int 뒤에 이름 맞춰야 함
+    public String index(HttpServletRequest request,
+                        @RequestParam(value = "page", defaultValue = "0") Integer page, // RequestParam 안쓰면 int 뒤에 이름 맞춰야 함
+                        @RequestParam(defaultValue = "") String keyword) {
 
-        List<Board> boardList = boardRepository.findAll(page);
+        // isEmpty() -> null, 공백
+        // isBlank() -> null, 공백, 화이트 스페이스
 
-        // 전제 페이지 개수
+        if (keyword.isBlank()) {
+            List<Board> boardList = boardRepository.findAll(page);
 
-        int count = boardRepository.count().intValue();
+            // 전체 페이지 개수
+            int count = boardRepository.count().intValue();
+            // 5 -> 2page
+            // 6 -> 2page
+            // 7 -> 3page
+            // 8 -> 3page
+            int namerge = count % 3 == 0 ? 0 : 1;
+            int allPageCount = count / 3 + namerge;
 
-        // 5 -> 2page
-        // 6 -> 2page
-        // 7 -> 3page
-        // 8 -> 3page
-        int namerge = count % 3 ==0 ? 0 : 1;
-        int allPageCount = count / 3 +namerge;
+            // 페이징의 핵심 변수
+            request.setAttribute("boardList", boardList); // boardList 다 넣어서 가져가는게 좋지만 board 객체라서(모든 뷰쪽으로 응답하는 것을 엔티티가 되어서는 안된다.)
 
-        // 페이징의 핵심 변수
-        request.setAttribute("boardList", boardList); // boardList 다 넣어서 가져가는게 좋지만 board 객체라서(모든 뷰쪽으로 응답하는 것을 엔티티가 되어서는 안된다.)
+            request.setAttribute("first", page == 0);
+            request.setAttribute("last", allPageCount == page + 1); //현재 페이지 알고 전제 페이지 알기
+            request.setAttribute("prev", page - 1);
+            request.setAttribute("next", page + 1);
+            request.setAttribute("keyword", "");
 
-        request.setAttribute("first", page == 0);
-        request.setAttribute("last", allPageCount == page+1); //현재 페이지 알고 전제 페이지 알기
-        request.setAttribute("prev", page - 1);
-        request.setAttribute("next", page + 1);
+        } else {
+            List<Board> boardList = boardRepository.findAll(page, keyword);
+
+            int count = boardRepository.count(keyword).intValue();
+
+            // 5 -> 2page
+            // 6 -> 2page
+            // 7 -> 3page
+            // 8 -> 3page
+            int namerge = count % 3 == 0 ? 0 : 1;
+            int allPageCount = count / 3 + namerge;
+
+            // 페이징의 핵심 변수
+            request.setAttribute("boardList", boardList); // boardList 다 넣어서 가져가는게 좋지만 board 객체라서(모든 뷰쪽으로 응답하는 것을 엔티티가 되어서는 안된다.)
+
+            request.setAttribute("first", page == 0);
+            request.setAttribute("last", allPageCount == page + 1); //현재 페이지 알고 전제 페이지 알기
+            request.setAttribute("prev", page - 1);
+            request.setAttribute("next", page + 1);
+            request.setAttribute("keyword", keyword);
+        }
 
         return "index";
     }
