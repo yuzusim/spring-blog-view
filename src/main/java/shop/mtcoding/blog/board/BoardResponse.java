@@ -19,5 +19,11 @@ public class BoardResponse {
         private int userId;
         private String username;
     }
+
+
+    // 화면을 위한 뷰는 필요한 것만 컬렉션으로 가져 오는게 좋다.
+    // private int id;
+    // private String title;
+
 }
 

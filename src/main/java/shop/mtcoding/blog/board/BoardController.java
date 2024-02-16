@@ -20,16 +20,16 @@ public class BoardController {
     // ?title=제목1&content=내용1
     // title=제목1&content=내용1
     @PostMapping("/board/{id}/update")
-    public String update(@PathVariable int id, BoardRequest.UpdateDTO requestDTO){
+    public String update(@PathVariable int id, BoardRequest.UpdateDTO requestDTO) {
         // 1. 인증 체크
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if(sessionUser == null){
+        if (sessionUser == null) {
             return "redirect:/loginForm";
         }
 
         // 2. 권한 체크
         Board board = boardRepository.findById(id);
-        if(board.getUserId() != sessionUser.getId()){
+        if (board.getUserId() != sessionUser.getId()) {
             return "error/403";
         }
 
@@ -37,15 +37,15 @@ public class BoardController {
         // update board_tb set title = ?, content = ? where id = ?;
         boardRepository.update(requestDTO, id);
 
-        return "redirect:/board/"+id;
+        return "redirect:/board/" + id;
     }
 
 
     @GetMapping("/board/{id}/updateForm")
-    public String updateForm(@PathVariable int id, HttpServletRequest request){
+    public String updateForm(@PathVariable int id, HttpServletRequest request) {
         // 1. 인증 안되면 나가
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if(sessionUser == null){
+        if (sessionUser == null) {
             return "redirect:/loginForm";
         }
 
@@ -53,7 +53,7 @@ public class BoardController {
         // 모델 위임 (id로 board를 조회)
         Board board = boardRepository.findById(id);
 
-        if(board.getUserId() != sessionUser.getId()){
+        if (board.getUserId() != sessionUser.getId()) {
             return "error/403";
         }
 
@@ -112,12 +112,31 @@ public class BoardController {
         return "redirect:/";
     }
 
+    // localhost:8080?page=0
+    // localhost:8080 -> page 값이 0
+    @GetMapping("/")
+    public String index(HttpServletRequest request, @RequestParam(value = "page", defaultValue = "0") Integer page) { // RequestParam 안쓰면 int 뒤에 이름 맞춰야 함
 
-    @GetMapping({"/", "/board"})
-    public String index(HttpServletRequest request) {
+        List<Board> boardList = boardRepository.findAll(page);
 
-        List<Board> boardList = boardRepository.findAll();
-        request.setAttribute("boardList", boardList);
+        // 전제 페이지 개수
+
+        int count = boardRepository.count().intValue();
+
+        // 5 -> 2page
+        // 6 -> 2page
+        // 7 -> 3page
+        // 8 -> 3page
+        int namerge = count % 3 ==0 ? 0 : 1;
+        int allPageCount = count / 3 +namerge;
+
+        // 페이징의 핵심 변수
+        request.setAttribute("boardList", boardList); // boardList 다 넣어서 가져가는게 좋지만 board 객체라서(모든 뷰쪽으로 응답하는 것을 엔티티가 되어서는 안된다.)
+
+        request.setAttribute("first", page == 0);
+        request.setAttribute("last", allPageCount == page+1); //현재 페이지 알고 전제 페이지 알기
+        request.setAttribute("prev", page - 1);
+        request.setAttribute("next", page + 1);
 
         return "index";
     }
