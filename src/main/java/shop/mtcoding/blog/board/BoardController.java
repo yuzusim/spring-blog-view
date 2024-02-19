@@ -116,12 +116,11 @@ public class BoardController {
     // localhost:8080 -> page 값이 0
     @GetMapping("/")
     public String index(HttpServletRequest request,
-                        @RequestParam(value = "page", defaultValue = "0") Integer page, // RequestParam 안쓰면 int 뒤에 이름 맞춰야 함
+                        @RequestParam(value = "page", defaultValue = "0") Integer page, // @RequestParam 안쓰면 int 뒤에 이름 맞춰야 함
                         @RequestParam(defaultValue = "") String keyword) {
 
         // isEmpty() -> null, 공백
         // isBlank() -> null, 공백, 화이트 스페이스
-
         if (keyword.isBlank()) {
             List<Board> boardList = boardRepository.findAll(page);
 
@@ -134,11 +133,13 @@ public class BoardController {
             int namerge = count % 3 == 0 ? 0 : 1;
             int allPageCount = count / 3 + namerge;
 
-            // 페이징의 핵심 변수
-            request.setAttribute("boardList", boardList); // boardList 다 넣어서 가져가는게 좋지만 board 객체라서(모든 뷰쪽으로 응답하는 것을 엔티티가 되어서는 안된다.)
+            // boardList 다 넣어서 가져가는게 좋지만 지금은 board 객체라서(모든 뷰쪽으로 응답하는 것을 엔티티가 되어서는 안된다.)
+            // 원래는 boardList에 한번에 담아서 가져오는 것이 맞음 (모든 view로 보내는 ENTITY는 다 DTO로 바꿔서 보내야)
+            request.setAttribute("boardList", boardList);
 
+            // 페이징의 핵심 변수
             request.setAttribute("first", page == 0);
-            request.setAttribute("last", allPageCount == page + 1); //현재 페이지 알고 전제 페이지 알기
+            request.setAttribute("last", allPageCount == page + 1); // 현재 페이지가 첫 페이지인지 마지막 페이지인지 확인하기 위함
             request.setAttribute("prev", page - 1);
             request.setAttribute("next", page + 1);
             request.setAttribute("keyword", "");
@@ -155,11 +156,13 @@ public class BoardController {
             int namerge = count % 3 == 0 ? 0 : 1;
             int allPageCount = count / 3 + namerge;
 
-            // 페이징의 핵심 변수
-            request.setAttribute("boardList", boardList); // boardList 다 넣어서 가져가는게 좋지만 board 객체라서(모든 뷰쪽으로 응답하는 것을 엔티티가 되어서는 안된다.)
+            // boardList 다 넣어서 가져가는게 좋지만 지금은 board 객체라서(모든 뷰쪽으로 응답하는 것을 엔티티가 되어서는 안된다.)
+            // 원래는 boardList에 한번에 담아서 가져오는 것이 맞음 (모든 view로 보내는 ENTITY는 다 DTO로 바꿔서 보내야)
+            request.setAttribute("boardList", boardList);
 
+            // 페이징의 핵심 변수
             request.setAttribute("first", page == 0);
-            request.setAttribute("last", allPageCount == page + 1); //현재 페이지 알고 전제 페이지 알기
+            request.setAttribute("last", allPageCount == page + 1);
             request.setAttribute("prev", page - 1);
             request.setAttribute("next", page + 1);
             request.setAttribute("keyword", keyword);
