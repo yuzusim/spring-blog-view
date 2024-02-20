@@ -75,7 +75,7 @@ public class BoardController {
     @PostMapping("/board/save")
     public String save(BoardRequest.SaveDTO requestDTO, HttpServletRequest request, @AuthenticationPrincipal MyLoginUser myLoginUser){
 
-        //2. 바디데이터를 확인 및 유효성 검사
+        // 2. 바디데이터를 확인 및 유효성 검사
         System.out.println(requestDTO);
 
         if (requestDTO.getTitle().length()>30){
@@ -84,7 +84,7 @@ public class BoardController {
             return "error/40x"; //badrequest
         }
 
-        //insert into board.tb(title, content, user_id, created_at) values(?, ?, ?, now());
+        // insert into board.tb(title, content, user_id, created_at) values(?, ?, ?, now());
         boardRepository.save(requestDTO, myLoginUser.getUser().getId());
         return "redirect:/";
     }
