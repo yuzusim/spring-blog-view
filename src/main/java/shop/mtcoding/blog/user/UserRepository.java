@@ -1,6 +1,7 @@
 package shop.mtcoding.blog.user;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Repository;
@@ -21,7 +22,7 @@ public class UserRepository {
     }
 
     @Transactional // db에 write 할때는 필수
-    public void save(UserRequest.JoinDTO requestDTO){
+    public void save(UserRequest.JoinDTO requestDTO) {
         Query query = em.createNativeQuery("insert into user_tb(username, password, email, created_at) values(?,?,?, now())");
         query.setParameter(1, requestDTO.getUsername());
         query.setParameter(2, requestDTO.getPassword());
@@ -29,12 +30,28 @@ public class UserRepository {
         query.executeUpdate();
     }
 
+    public User findByUsername(String username) {
+        Query query = em.createNativeQuery("select * from user_tb where username=?", User.class);
+        query.setParameter(1, username);
+
+        try {
+            User user = (User) query.getSingleResult();
+            return user;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public User findByUsernameAndPassword(UserRequest.LoginDTO requestDTO) {
         Query query = em.createNativeQuery("select * from user_tb where username=? and password=?", User.class);
         query.setParameter(1, requestDTO.getUsername());
         query.setParameter(2, requestDTO.getPassword());
 
-        User user = (User) query.getSingleResult();
-        return user;
+        try {
+            User user = (User) query.getSingleResult();
+            return user;
+        } catch (Exception e) {
+            throw new RuntimeException("아이디 혹은 비밀번호를 찾을 수 없습니다");
+        }
     }
 }

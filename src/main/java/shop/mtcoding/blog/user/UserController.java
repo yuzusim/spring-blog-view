@@ -3,9 +3,14 @@ package shop.mtcoding.blog.user;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
+import shop.mtcoding.blog._core.util.ApiUtil;
+import shop.mtcoding.blog._core.util.Script;
 
 
 @RequiredArgsConstructor // final이 붙은 애들에 대한 생성자를 만들어줌
@@ -16,26 +21,35 @@ public class UserController {
     private final UserRepository userRepository;
     private final HttpSession session;
 
+    @GetMapping("/api/username-same-check")
+    public @ResponseBody ApiUtil<?> usernameSameCheck(String username){
+        User user = userRepository.findByUsername(username);
+        if(user == null){ // 회원가입 해도 된다.
+            return new ApiUtil<>(true);
+        }else{ // 회원가입 하면 안된다.
+            return new ApiUtil<>(false);
+        }
+    }
+
+
     // 왜 조회인데 post임? 민간함 정보는 body로 보낸다.
     // 로그인만 예외로 select인데 post 사용
     // select * from user_tb where username=? and password=?
     @PostMapping("/login")
     public String login(UserRequest.LoginDTO requestDTO) {
-
-
         System.out.println(requestDTO); // toString -> @Data
 
         if (requestDTO.getUsername().length() < 3) {
-            return "error/400"; // ViewResolver 설정이 되어 있음. (앞 경로, 뒤 경로)
+            throw new RuntimeException("유저네임 길이가 너무 짧아요");
         }
 
-        User user = userRepository.findByUsernameAndPassword(requestDTO);
+        User user = userRepository.findByUsername(requestDTO.getUsername());
 
-        if (user == null) { // 조회 안됨 (401)
-            return "error/401";
-        } else { // 조회 됐음 (인증됨)
-            session.setAttribute("sessionUser", user); // 락카에 담음 (StateFul)
+        if(!BCrypt.checkpw(requestDTO.getPassword(), user.getPassword())){
+            throw new RuntimeException("패스워드가 틀렸습니다");
         }
+        session.setAttribute("sessionUser", user); // 락카에 담음 (StateFul)
+
 
         return "redirect:/"; // 컨트롤러가 존재하면 무조건 redirect 외우기
     }
@@ -44,7 +58,15 @@ public class UserController {
     public String join(UserRequest.JoinDTO requestDTO) {
         System.out.println(requestDTO);
 
-        userRepository.save(requestDTO); // 모델에 위임하기
+        String rawPassword = requestDTO.getPassword();
+        String encPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+        requestDTO.setPassword(encPassword);
+
+        try {
+            userRepository.save(requestDTO); // 모델에 위임하기
+        } catch (Exception e) {
+            throw new RuntimeException("아이디가 중복되었어요");
+        }
         return "redirect:/loginForm";
     }
 
