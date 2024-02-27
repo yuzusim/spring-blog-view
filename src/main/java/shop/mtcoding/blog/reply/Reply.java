@@ -20,9 +20,7 @@ public class Reply {
     private int userId;
     private int boardId;
 
-
     private LocalDateTime createdAt;
-
 
 
 }

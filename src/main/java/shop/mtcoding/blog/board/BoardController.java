@@ -4,11 +4,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import shop.mtcoding.blog.love.LoveRepository;
+import shop.mtcoding.blog.love.LoveResponse;
 import shop.mtcoding.blog.reply.ReplyRepository;
 import shop.mtcoding.blog.user.User;
 
-import java.util.HashMap;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -18,6 +22,7 @@ public class BoardController {
     private final HttpSession session;
     private final BoardRepository boardRepository;
     private final ReplyRepository replyRepository;
+    private final LoveRepository loveRepository;
 
     // ?title=제목1&content=내용1
     // title=제목1&content=내용1
@@ -114,55 +119,41 @@ public class BoardController {
         return "redirect:/";
     }
 
-    // localhost:8080?page=0
-    // localhost:8080 -> page 값이 0
-    @GetMapping("/")
-    public String index(HttpServletRequest request,
-                        @RequestParam(value = "page", defaultValue = "0") Integer page, // @RequestParam 안쓰면 int 뒤에 이름 맞춰야 함
-                        @RequestParam(defaultValue = "") String keyword) {
 
-        // isEmpty() -> null, 공백
-        // isBlank() -> null, 공백, 화이트 스페이스
+    // localhost:8080?page=1 -> page 값이 1
+    // localhost:8080  -> page 값이 0
+    @GetMapping("/")
+    public String index(
+            HttpServletRequest request,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "") String keyword) {
+
+        // isEmpty -> null, 공백
+        // isBlank -> null, 공백, 화이트 스페이스
+
         if (keyword.isBlank()) {
             List<Board> boardList = boardRepository.findAll(page);
-
             // 전체 페이지 개수
             int count = boardRepository.count().intValue();
-            // 5 -> 2page
-            // 6 -> 2page
-            // 7 -> 3page
-            // 8 -> 3page
+
             int namerge = count % 3 == 0 ? 0 : 1;
             int allPageCount = count / 3 + namerge;
 
-            // boardList 다 넣어서 가져가는게 좋지만 지금은 board 객체라서(모든 뷰쪽으로 응답하는 것을 엔티티가 되어서는 안된다.)
-            // 원래는 boardList에 한번에 담아서 가져오는 것이 맞음 (모든 view로 보내는 ENTITY는 다 DTO로 바꿔서 보내야)
             request.setAttribute("boardList", boardList);
-
-            // 페이징의 핵심 변수
             request.setAttribute("first", page == 0);
-            request.setAttribute("last", allPageCount == page + 1); // 현재 페이지가 첫 페이지인지 마지막 페이지인지 확인하기 위함
+            request.setAttribute("last", allPageCount == page + 1);
             request.setAttribute("prev", page - 1);
             request.setAttribute("next", page + 1);
             request.setAttribute("keyword", "");
-
         } else {
             List<Board> boardList = boardRepository.findAll(page, keyword);
-
+            // 전체 페이지 개수
             int count = boardRepository.count(keyword).intValue();
 
-            // 5 -> 2page
-            // 6 -> 2page
-            // 7 -> 3page
-            // 8 -> 3page
             int namerge = count % 3 == 0 ? 0 : 1;
             int allPageCount = count / 3 + namerge;
 
-            // boardList 다 넣어서 가져가는게 좋지만 지금은 board 객체라서(모든 뷰쪽으로 응답하는 것을 엔티티가 되어서는 안된다.)
-            // 원래는 boardList에 한번에 담아서 가져오는 것이 맞음 (모든 view로 보내는 ENTITY는 다 DTO로 바꿔서 보내야)
             request.setAttribute("boardList", boardList);
-
-            // 페이징의 핵심 변수
             request.setAttribute("first", page == 0);
             request.setAttribute("last", allPageCount == page + 1);
             request.setAttribute("prev", page - 1);
@@ -192,33 +183,26 @@ public class BoardController {
 
     @GetMapping("/board/{id}")
     public String detail(@PathVariable int id, HttpServletRequest request) {
-        // 2. 페이지 주인 여부 체크 (board의 userId와 sessionUser의 id를 비교)
         User sessionUser = (User) session.getAttribute("sessionUser");
-
-        // 1. 모델 진입 - 상세보기 데이터 가져오기
         BoardResponse.DetailDTO boardDTO = boardRepository.findByIdWithUser(id);
         boardDTO.isBoardOwner(sessionUser);
 
         List<BoardResponse.ReplyDTO> replyDTOList = replyRepository.findByBoardId(id, sessionUser);
-
         request.setAttribute("board", boardDTO);
         request.setAttribute("replyList", replyDTOList);
 
+        if(sessionUser == null){
+            LoveResponse.DetailDTO loveDetailDTO = loveRepository.findLove(id);
+            request.setAttribute("love", loveDetailDTO);
+        }else{
+            LoveResponse.DetailDTO loveDetailDTO = loveRepository.findLove(id, sessionUser.getId());
+            request.setAttribute("love", loveDetailDTO);
+        }
+
+        // fas fa-heart text-danger
+        // far fa-heart
+        // request.setAttribute("css", "far fa-heart");
+
         return "board/detail";
-
-
-
-//        boolean pageOwner;
-//        if (sessionUser == null) {
-//            pageOwner = false;
-//        } else {
-//            int 게시글작성자번호 = responseDTO.getUserId();
-//            int 로그인한사람의번호 = sessionUser.getId();
-//            pageOwner = 게시글작성자번호 == 로그인한사람의번호;
-//        }
-//
-
-
-
     }
 }

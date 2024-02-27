@@ -1,5 +1,5 @@
-insert into user_tb(username, password, email, created_at) values('ssar', '1234', 'ssar@nate.com', now());
-insert into user_tb(username, password, email, created_at) values('cos', '1234', 'cos@nate.com', now());
+insert into user_tb(username, password, email, created_at) values('ssar', '$2a$10$g5FD.uMo1hL5SJx5Y9KQd.xcJzcAfU8BLDlruOS82ncEXN93shtCa', 'ssar@nate.com', now());
+insert into user_tb(username, password, email, created_at) values('cos', '$2a$10$g5FD.uMo1hL5SJx5Y9KQd.xcJzcAfU8BLDlruOS82ncEXN93shtCa', 'cos@nate.com', now());
 
 insert into board_tb(title, content, user_id, created_at) values('제목1', '내용1', 1, now());
 insert into board_tb(title, content, user_id, created_at) values('제목2', '내용2', 1, now());
@@ -15,3 +15,7 @@ insert into reply_tb(comment, board_id, user_id, created_at) values('댓글1', 1
 insert into reply_tb(comment, board_id, user_id, created_at) values('댓글2', 4, 1, now());
 insert into reply_tb(comment, board_id, user_id, created_at) values('댓글3', 4, 1, now());
 insert into reply_tb(comment, board_id, user_id, created_at) values('댓글4', 4, 2, now());
+
+insert into love_tb(board_id, user_id, created_at) values(9, 1, now());
+insert into love_tb(board_id, user_id, created_at) values(9, 2, now());
+insert into love_tb(board_id, user_id, created_at) values(8, 1, now());
